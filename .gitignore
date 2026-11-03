@@ -1,0 +1,69 @@
+# ---------------------------------------------------------------------------
+# Dépendances
+# ---------------------------------------------------------------------------
+node_modules/
+
+# ---------------------------------------------------------------------------
+# Artefacts de build / caches
+# ---------------------------------------------------------------------------
+dist/
+dist-ssr/
+.output/
+.vinxi/
+.nitro/
+.tanstack/
+*.tsbuildinfo
+.eslintcache
+
+# Wrangler / Cloudflare : cache local et fichiers de secrets (.dev.vars).
+.wrangler/
+.dev.vars
+
+# ---------------------------------------------------------------------------
+# Variables d'environnement
+# ---------------------------------------------------------------------------
+# Secrets locaux : JAMAIS committés. `.env` contient les clés du projet Supabase.
+.env
+.env.local
+.env.*.local
+*.local
+
+# Fichiers publics destinés au dépôt (ne pas ignorer).
+!.env.example
+!.env.production
+
+# ---------------------------------------------------------------------------
+# Environnement Lovable (contient un jeton d'accès) — ne jamais publier.
+# ---------------------------------------------------------------------------
+.workspace/
+
+# ---------------------------------------------------------------------------
+# Logs
+# ---------------------------------------------------------------------------
+logs/
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ---------------------------------------------------------------------------
+# Tests / couverture
+# ---------------------------------------------------------------------------
+coverage/
+
+# ---------------------------------------------------------------------------
+# Éditeurs et OS
+# ---------------------------------------------------------------------------
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

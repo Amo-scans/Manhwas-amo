@@ -1,0 +1,67 @@
+name: CI
+
+# VÃ©rifie chaque poussÃ©e / pull request : types, puis build statique GitHub Pages.
+# Aucun secret n'est nÃ©cessaire : seules des valeurs publiques (URL Supabase +
+# clÃ© anon/publishable, dÃ©jÃ  embarquÃ©e dans le bundle client) sont utilisÃ©es.
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Typecheck & build Pages
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      # Build de contrÃ´le servi Ã  la racine : la CI ne dÃ©ploie rien.
+      VITE_BASE_PATH: "/"
+      VITE_SITE_URL: "https://assia123y.github.io/amo-scans-fr"
+      # Valeurs publiques (identiques Ã  .env.production), dupliquÃ©es ici pour que
+      # la CI reste verte mÃªme si .env.production venait Ã  manquer.
+      VITE_SUPABASE_URL: "https://yvjmuaofgxjibflbzybz.supabase.co"
+      VITE_SUPABASE_PUBLISHABLE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2am11YW9mZ3hqaWJmbGJ6eWJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NDgxMTAsImV4cCI6MjA5NDUyNDExMH0.mbPWl7ydKj_BM3UmoWLyYFP3rRxcNeH1C49_GjmvoN0"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build static site (GitHub Pages)
+        run: npm run build:pages
+
+      - name: Verify build output
+        run: |
+          test -f dist/client/index.html
+          test -f dist/client/404.html
+          test -f dist/client/.nojekyll
+          test -f dist/client/sitemap.xml
+          test -f dist/client/robots.txt
+          test -f dist/client/favicon.svg
+          test -f dist/client/site.webmanifest
+          test -f dist/client/og-image.jpg
+          echo "dist/client:"
+          ls -la dist/client
+          du -sh dist/client

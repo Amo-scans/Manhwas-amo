@@ -1,0 +1,10 @@
+# AMO-SCANS-FR — robots.txt
+# Le site est public ; les zones authentifiées sont exclues de l'indexation.
+
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /auth
+
+# Sitemap généré au build par scripts/build-pages.mjs (dist/client/sitemap.xml).
+Sitemap: https://assia123y.github.io/amo-scans-fr/sitemap.xml
