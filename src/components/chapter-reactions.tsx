@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { Heart } from "lucide-react";
@@ -5,6 +6,7 @@ import { toast } from "sonner";
 
 import { useAuth } from "@/hooks/use-auth";
 import {
+  REACTION_BY_KIND,
   REACTIONS,
   chapterReactionsQueryOptions,
   emptyReactionCounts,
@@ -29,12 +31,20 @@ export function ChapterReactions({ chapterId }: { chapterId: string }) {
   const reactionsQuery = useQuery(options);
   const queryKey = options.queryKey;
 
-  const rows = reactionsQuery.data ?? [];
-  const counts = emptyReactionCounts();
-  for (const row of rows) {
-    if (row.reaction in counts) counts[row.reaction] += 1;
-  }
-  const mine = user ? (rows.find((row) => row.user_id === user.id)?.reaction ?? null) : null;
+  const rows = useMemo(() => reactionsQuery.data ?? [], [reactionsQuery.data]);
+
+  const counts = useMemo(() => {
+    const next = emptyReactionCounts();
+    for (const row of rows) {
+      if (row.reaction in next) next[row.reaction] += 1;
+    }
+    return next;
+  }, [rows]);
+
+  const mine = useMemo(
+    () => (user ? (rows.find((row) => row.user_id === user.id)?.reaction ?? null) : null),
+    [rows, user],
+  );
   const total = rows.length;
 
   const mutation = useMutation({
@@ -106,6 +116,7 @@ export function ChapterReactions({ chapterId }: { chapterId: string }) {
                 onClick={() => handleClick(reaction.kind)}
                 aria-pressed={isMine}
                 aria-label={`${reaction.label}${count > 0 ? ` (${count})` : ""}`}
+                title={reaction.label}
                 disabled={mutation.isPending}
                 className={cn(
                   "inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm transition-colors",
@@ -128,7 +139,9 @@ export function ChapterReactions({ chapterId }: { chapterId: string }) {
         {user ? (
           <p className="mt-3 flex items-center gap-1.5 text-[11px] text-muted-foreground">
             <Heart aria-hidden="true" className="h-3 w-3" />
-            {mine ? "Click again to remove your reaction." : "Pick the reaction that fits."}
+            {mine
+              ? `You reacted with ${REACTION_BY_KIND[mine].emoji} ${REACTION_BY_KIND[mine].label} — click again to remove it.`
+              : "Pick the reaction that fits."}
           </p>
         ) : (
           <p className="mt-3 text-[11px] text-muted-foreground">

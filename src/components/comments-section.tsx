@@ -68,7 +68,10 @@ export function CommentsSection({ slug, episode }: CommentsSectionProps) {
   const [content, setContent] = useState("");
   const [confirmingDeleteId, setConfirmingDeleteId] = useState<string | null>(null);
 
-  const comments = commentsQuery.data ?? [];
+  const comments = useMemo(
+    () => [...(commentsQuery.data ?? [])].sort((a, b) => b.created_at.localeCompare(a.created_at)),
+    [commentsQuery.data],
+  );
   const trimmed = content.trim();
   const canPost = Boolean(user) && trimmed.length > 0 && !commentsQuery.isLoading;
 
@@ -209,6 +212,12 @@ export function CommentsSection({ slug, episode }: CommentsSectionProps) {
             id="comment-content"
             value={content}
             onChange={(event) => setContent(event.target.value)}
+            onKeyDown={(event) => {
+              if ((event.metaKey || event.ctrlKey) && event.key === "Enter" && canPost) {
+                event.preventDefault();
+                postMutation.mutate(trimmed);
+              }
+            }}
             placeholder="Share your thoughts on this chapter…"
             maxLength={MAX_LENGTH}
             rows={3}
@@ -216,6 +225,9 @@ export function CommentsSection({ slug, episode }: CommentsSectionProps) {
             className="min-h-24 resize-none border-neutral-800 bg-surface text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-accent"
           />
           <div className="mt-2 flex items-center justify-between gap-3">
+            <p className="hidden text-[11px] text-muted-foreground/70 sm:block">
+              Ctrl+Enter to post
+            </p>
             <p
               id="comment-counter"
               className={cn(

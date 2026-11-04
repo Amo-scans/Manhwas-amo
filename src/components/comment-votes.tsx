@@ -18,6 +18,7 @@ export function CommentVotes({ tally, disabled = false, onVote }: CommentVotesPr
         disabled={disabled}
         aria-pressed={tally.mine === 1}
         aria-label={`Like this comment${tally.likes > 0 ? ` (${tally.likes})` : ""}`}
+        title="Like"
         onClick={() => onVote(tally.mine === 1 ? null : 1)}
         className={cn(
           "inline-flex items-center gap-1 rounded-sm px-1.5 py-1 text-[11px] transition-colors",
@@ -37,6 +38,7 @@ export function CommentVotes({ tally, disabled = false, onVote }: CommentVotesPr
         disabled={disabled}
         aria-pressed={tally.mine === -1}
         aria-label={`Dislike this comment${tally.dislikes > 0 ? ` (${tally.dislikes})` : ""}`}
+        title="Dislike"
         onClick={() => onVote(tally.mine === -1 ? null : -1)}
         className={cn(
           "inline-flex items-center gap-1 rounded-sm px-1.5 py-1 text-[11px] transition-colors",
