@@ -202,6 +202,17 @@ async function main() {
 
   const sitemap = renderSitemap(await fetchSitemapEntries(siteUrl), siteUrl);
   writeIfChanged("sitemap.xml", sitemap);
+
+  // Lets an open tab notice that a newer build was deployed and offer a reload.
+  const buildVersion = (process.env.GITHUB_SHA || process.env.BUILD_VERSION || "").slice(0, 7);
+  writeIfChanged(
+    "version.json",
+    `${JSON.stringify(
+      { version: buildVersion || "dev", builtAt: new Date().toISOString() },
+      null,
+      2,
+    )}\n`,
+  );
   writeIfChanged(
     "robots.txt",
     [

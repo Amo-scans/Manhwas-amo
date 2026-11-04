@@ -17,6 +17,9 @@ const isPagesBuild = process.env.BUILD_TARGET === "pages";
 // CI (GitHub Actions) may override the committed defaults at build time.
 const siteUrl = process.env.VITE_SITE_URL;
 const basePath = process.env.VITE_BASE_PATH;
+// Short commit SHA of the deployed build; used by the in-app "new version" check.
+const buildVersion =
+  (process.env.GITHUB_SHA || process.env.BUILD_VERSION || "").slice(0, 7) || "dev";
 
 export default defineConfig({
   // The Cloudflare plugin only makes sense for the SSR/worker build.
@@ -32,6 +35,7 @@ export default defineConfig({
     define: {
       ...(siteUrl ? { "import.meta.env.VITE_SITE_URL": JSON.stringify(siteUrl) } : {}),
       ...(basePath ? { "import.meta.env.VITE_BASE_PATH": JSON.stringify(basePath) } : {}),
+      "import.meta.env.VITE_BUILD_VERSION": JSON.stringify(buildVersion),
     },
     build: {
       // manhwa panels are large images; keep the warning threshold realistic

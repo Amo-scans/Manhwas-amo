@@ -10,6 +10,7 @@ import {
 
 import appCss from "../styles.css?url";
 import { AuthProvider } from "@/hooks/use-auth";
+import { useAppUpdate } from "@/hooks/use-app-update";
 import { Toaster } from "sonner";
 import { SITE_DESCRIPTION, SITE_NAME, buildPageMeta } from "@/lib/seo";
 
@@ -158,12 +159,28 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const updateAvailable = useAppUpdate();
 
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <Outlet />
         <Toaster theme="dark" position="top-center" richColors closeButton />
+        {updateAvailable ? (
+          <div
+            role="status"
+            className="fixed inset-x-0 bottom-0 z-[100] flex flex-wrap items-center justify-center gap-3 bg-accent px-4 py-2.5 text-sm font-medium text-accent-foreground shadow-lg"
+          >
+            A new version of the site is available.
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="rounded-md bg-black/25 px-3 py-1 text-xs font-semibold uppercase tracking-wider transition hover:bg-black/40"
+            >
+              Reload
+            </button>
+          </div>
+        ) : null}
       </AuthProvider>
     </QueryClientProvider>
   );
