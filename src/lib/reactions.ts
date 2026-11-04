@@ -19,7 +19,7 @@ export const REACTIONS: ReadonlyArray<{ kind: ReactionKind; emoji: string; label
   { kind: "haha", emoji: "😂", label: "Haha" },
   { kind: "wow", emoji: "😮", label: "Wow" },
   { kind: "sad", emoji: "😢", label: "Sad" },
-  kind: "fire", emoji: "🔥", label: "Fire" },
+  { kind: "fire", emoji: "🔥", label: "Fire" },
 ];
 
 export function emptyReactionCounts(): Record<ReactionKind, number> {
