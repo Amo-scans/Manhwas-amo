@@ -4,7 +4,7 @@ import { AlertTriangle, Eye, EyeOff, Loader2, MailCheck } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { useBackendStatus } from "@/hooks/use-backend-status";
+import { useAuthHealth } from "@/hooks/use-backend-status";
 import { SiteNav } from "@/components/site-nav";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -228,7 +228,7 @@ function AuthPage() {
   const search = Route.useSearch();
   const { user, loading: authLoading } = useAuth();
   const redirectTarget = sanitizeInternalRedirect(search.redirect);
-  const backendStatus = useBackendStatus();
+  const backendStatus = useAuthHealth();
 
   const [mode, setMode] = useState<AuthMode>(search.mode === "reset" ? "reset" : "signin");
   const [email, setEmail] = useState("");
@@ -529,7 +529,7 @@ function AuthPage() {
       <SiteNav />
       <main className="mx-auto w-full max-w-md px-5 py-12 sm:py-16">
         <div className="rounded-2xl border border-neutral-800 bg-surface/50 p-6 shadow-xl sm:p-8">
-          {backendStatus === "offline" ? (
+          {backendStatus.status === "offline" ? (
             <div
               role="status"
               className="mb-6 rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-left text-sm text-amber-200"
@@ -718,7 +718,7 @@ function AuthPage() {
               <h1 className="text-2xl font-semibold tracking-tight text-foreground">{heading}</h1>
               <p className="mt-2 text-sm text-muted-foreground">{subheading}</p>
 
-              {mode === "signin" || mode === "signup" ? (
+              {backendStatus.googleEnabled && (mode === "signin" || mode === "signup") ? (
                 <>
                   <Button
                     type="button"

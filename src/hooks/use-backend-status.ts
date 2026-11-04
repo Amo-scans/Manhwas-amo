@@ -2,21 +2,39 @@ import { useEffect, useState } from "react";
 
 export type BackendStatus = "checking" | "online" | "offline";
 
+export type AuthHealth = {
+  /** Whether the Supabase auth API answers at all. */
+  status: BackendStatus;
+  /** Email/password provider enabled in the Supabase project. */
+  emailEnabled: boolean;
+  /** Google OAuth provider enabled in the Supabase project (needs Google Cloud credentials). */
+  googleEnabled: boolean;
+};
+
+const OFFLINE: AuthHealth = { status: "offline", emailEnabled: false, googleEnabled: false };
+
 /**
- * Cheap health probe against the Supabase auth endpoint.
+ * Reads the Supabase auth settings once per page load.
  *
- * The site can be deployed while its database is not configured yet (or paused):
- * in that case every sign-in/sign-up call fails with a network error. Detecting it
- * up-front lets the UI explain the real problem instead of showing a generic error.
+ * - `status: "offline"` when the project is missing, paused or unreachable → the
+ *   sign-in page explains that the database is not connected instead of failing.
+ * - `googleEnabled` drives the visibility of the "Continue with Google" button: an
+ *   OAuth provider that is not configured in Supabase can only fail, so we do not
+ *   offer it. Enabling the provider in Supabase makes the button appear on the next
+ *   page load — no redeploy required.
  */
-export function useBackendStatus(): BackendStatus {
-  const [status, setStatus] = useState<BackendStatus>("checking");
+export function useAuthHealth(): AuthHealth {
+  const [health, setHealth] = useState<AuthHealth>({
+    status: "checking",
+    emailEnabled: false,
+    googleEnabled: false,
+  });
 
   useEffect(() => {
     const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
     const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
     if (!url || !key) {
-      setStatus("offline");
+      setHealth(OFFLINE);
       return;
     }
 
@@ -27,8 +45,19 @@ export function useBackendStatus(): BackendStatus {
       headers: { apikey: key },
       signal: controller.signal,
     })
-      .then((response) => setStatus(response.ok ? "online" : "offline"))
-      .catch(() => setStatus("offline"))
+      .then(async (response) => {
+        if (!response.ok) {
+          setHealth(OFFLINE);
+          return;
+        }
+        const payload = (await response.json()) as { external?: Record<string, boolean> };
+        setHealth({
+          status: "online",
+          emailEnabled: payload.external?.email === true,
+          googleEnabled: payload.external?.google === true,
+        });
+      })
+      .catch(() => setHealth(OFFLINE))
       .finally(() => clearTimeout(timeout));
 
     return () => {
@@ -37,5 +66,5 @@ export function useBackendStatus(): BackendStatus {
     };
   }, []);
 
-  return status;
+  return health;
 }
