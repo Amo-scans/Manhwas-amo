@@ -1,8 +1,8 @@
 name: CI
 
-# VÃƒÂ©rifie chaque poussÃƒÂ©e / pull request : types, puis build statique GitHub Pages.
-# Aucun secret n'est nÃƒÂ©cessaire : seules des valeurs publiques (URL Supabase +
-# clÃƒÂ© anon/publishable, dÃƒÂ©jÃƒÂ  embarquÃƒÂ©e dans le bundle client) sont utilisÃƒÂ©es.
+# VÃƒÆ’Ã‚Â©rifie chaque poussÃƒÆ’Ã‚Â©e / pull request : types, puis build statique GitHub Pages.
+# Aucun secret n'est nÃƒÆ’Ã‚Â©cessaire : seules des valeurs publiques (URL Supabase +
+# clÃƒÆ’Ã‚Â© anon/publishable, dÃƒÆ’Ã‚Â©jÃƒÆ’Ã‚Â  embarquÃƒÆ’Ã‚Â©e dans le bundle client) sont utilisÃƒÆ’Ã‚Â©es.
 
 on:
   push:
@@ -25,11 +25,11 @@ jobs:
     timeout-minutes: 15
 
     env:
-      # Build de contrÃƒÂ´le servi ÃƒÂ  la racine : la CI ne dÃƒÂ©ploie rien.
+      # Build de contrÃƒÆ’Ã‚Â´le servi ÃƒÆ’Ã‚Â  la racine : la CI ne dÃƒÆ’Ã‚Â©ploie rien.
       VITE_BASE_PATH: "/"
-      VITE_SITE_URL: "https://assia123y.github.io/amo-scans-fr"
-      # Valeurs publiques (identiques ÃƒÂ  .env.production), dupliquÃƒÂ©es ici pour que
-      # la CI reste verte mÃƒÂªme si .env.production venait ÃƒÂ  manquer.
+      VITE_SITE_URL: "https://assia123y.github.io/Manhwas-amo"
+      # Valeurs publiques (identiques ÃƒÆ’Ã‚Â  .env.production), dupliquÃƒÆ’Ã‚Â©es ici pour que
+      # la CI reste verte mÃƒÆ’Ã‚Âªme si .env.production venait ÃƒÆ’Ã‚Â  manquer.
       VITE_SUPABASE_URL: "https://zfypjnylpbtijjhlcyhr.supabase.co"
       VITE_SUPABASE_PUBLISHABLE_KEY: "sb_publishable_dUwNG2AW7Hl9Vs2l8G3vtw_ql0Q8MZi"
 

@@ -1,10 +1,10 @@
-# AMO-SCANS-FR — robots.txt
-# Le site est public ; les zones authentifiées sont exclues de l'indexation.
+# AMO-SCANS-FR â€” robots.txt
+# Le site est public ; les zones authentifiÃ©es sont exclues de l'indexation.
 
 User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /auth
 
-# Sitemap généré au build par scripts/build-pages.mjs (dist/client/sitemap.xml).
-Sitemap: https://assia123y.github.io/amo-scans-fr/sitemap.xml
+# Sitemap gÃ©nÃ©rÃ© au build par scripts/build-pages.mjs (dist/client/sitemap.xml).
+Sitemap: https://assia123y.github.io/Manhwas-amo/sitemap.xml

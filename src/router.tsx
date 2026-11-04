@@ -5,7 +5,7 @@ import { createQueryClient } from "@/lib/query-client";
 /**
  * Vite's `BASE_URL` mirrors the configured `base`:
  *   - "/" on the Cloudflare/SSR deployment and on user/organisation Pages,
- *   - "/amo-scans-fr/" on a GitHub Pages *project* site.
+ *   - "/Manhwas-amo/" on a GitHub Pages *project* site.
  * TanStack Router needs it as a `basepath` so `<Link>` and the history work
  * behind that sub-path instead of escaping to the domain root.
  */

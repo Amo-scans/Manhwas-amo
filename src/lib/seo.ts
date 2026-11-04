@@ -11,7 +11,7 @@ export const SITE_TAGLINE = "Original manhwa, read vertically.";
 export const SITE_DESCRIPTION =
   "Read original manhwa series published by AMO-SCANS-FR: cinematic dark fantasy webcomics, vertical-scroll reader, new chapters every week.";
 
-const FALLBACK_SITE_URL = "https://assia123y.github.io/amo-scans-fr";
+const FALLBACK_SITE_URL = "https://assia123y.github.io/Manhwas-amo";
 
 function trimTrailingSlash(value: string): string {
   return value.replace(/\/+$/, "");
@@ -27,7 +27,7 @@ export function absoluteUrl(path: string): string {
   return `${SITE_URL}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
-/** Absolute URL for the default social preview image (1200×630 JPEG). */
+/** Absolute URL for the default social preview image (1200Ã—630 JPEG). */
 export function socialImageUrl(path = "/og-image.jpg"): string {
   return absoluteUrl(path);
 }

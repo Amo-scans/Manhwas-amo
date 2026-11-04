@@ -10,7 +10,7 @@
  *     `.nojekyll`, `robots.txt`, `sitemap.xml`.
  *
  * Env:
- *   VITE_BASE_PATH  sub-path the site is served from ("/" or "/amo-scans-fr/")
+ *   VITE_BASE_PATH  sub-path the site is served from ("/" or "/Manhwas-amo/")
  *   VITE_SITE_URL   absolute public origin, e.g. https://user.github.io/amo-scans-fr
  *   SUPABASE_URL / SUPABASE_PUBLISHABLE_KEY (or the VITE_* variants) for the sitemap
  */
@@ -44,7 +44,7 @@ function parseEnvFile(file) {
   return values;
 }
 
-/** Highest priority first â€” mirrors Vite's own env file precedence. */
+/** Highest priority first Ã¢â‚¬â€ mirrors Vite's own env file precedence. */
 function loadEnvFiles() {
   const files = [".env.production.local", ".env.production", ".env.local", ".env"];
   const merged = {};
@@ -92,7 +92,7 @@ async function fetchSitemapEntries(siteUrl) {
   ];
 
   if (!supabaseUrl || !supabaseKey) {
-    console.warn("[pages] Supabase env missing â€” sitemap limited to static routes.");
+    console.warn("[pages] Supabase env missing Ã¢â‚¬â€ sitemap limited to static routes.");
     return entries;
   }
 
@@ -175,7 +175,7 @@ async function main() {
   console.log(`[pages] building static SPA (base=${base}, site=${siteUrl})`);
   const viteBin = path.join(root, "node_modules", "vite", "bin", "vite.js");
   if (!existsSync(viteBin)) {
-    console.error("[pages] vite not installed â€” run `npm install` first.");
+    console.error("[pages] vite not installed Ã¢â‚¬â€ run `npm install` first.");
     process.exit(1);
   }
   const build = spawnSync(process.execPath, [viteBin, "build"], {
@@ -189,7 +189,7 @@ async function main() {
 
   const shellPath = path.join(clientDir, "_shell.html");
   if (!existsSync(shellPath)) {
-    console.error(`[pages] expected SPA shell at ${shellPath} â€” did SPA mode change?`);
+    console.error(`[pages] expected SPA shell at ${shellPath} Ã¢â‚¬â€ did SPA mode change?`);
     process.exit(1);
   }
 
@@ -226,7 +226,7 @@ async function main() {
     ].join("\n"),
   );
 
-  console.log("[pages] done â†’ dist/client");
+  console.log("[pages] done Ã¢â€ â€™ dist/client");
   console.log(`[pages] preview: npm run preview:pages   (or open ${siteUrl})`);
 }
 
