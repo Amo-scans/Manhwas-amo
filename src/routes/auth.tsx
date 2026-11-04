@@ -3,8 +3,8 @@ import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "rea
 import { AlertTriangle, Eye, EyeOff, Loader2, MailCheck } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/hooks/use-auth";
+import { useBackendStatus } from "@/hooks/use-backend-status";
 import { SiteNav } from "@/components/site-nav";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -93,9 +93,11 @@ function readableAuthError(error: unknown): string {
   if (
     message.includes("failed to fetch") ||
     message.includes("networkerror") ||
-    message.includes("network request failed")
+    message.includes("network request failed") ||
+    message.includes("load failed") ||
+    message.includes("enotfound")
   ) {
-    return "Network error — check your connection and try again.";
+    return "Cannot reach the database — the site is online but its Supabase backend is not configured yet. Sign-in works again as soon as the project URL and anon key are set (see DEPLOY.md §A.0).";
   }
   if (message.includes("signup is disabled")) return "Account creation is disabled on this site.";
   return raw.trim() || "Something went wrong. Please try again.";
@@ -226,6 +228,7 @@ function AuthPage() {
   const search = Route.useSearch();
   const { user, loading: authLoading } = useAuth();
   const redirectTarget = sanitizeInternalRedirect(search.redirect);
+  const backendStatus = useBackendStatus();
 
   const [mode, setMode] = useState<AuthMode>(search.mode === "reset" ? "reset" : "signin");
   const [email, setEmail] = useState("");
@@ -412,17 +415,15 @@ function AuthPage() {
     setFormError(null);
     setPending("google");
     try {
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
+      // Native Supabase OAuth. The previous implementation used the Lovable OAuth
+      // broker (`/~oauth/initiate`), which only exists on Lovable hosting and 404s
+      // on GitHub Pages. Google must be enabled in Supabase → Authentication → Providers.
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: authPageUrl() },
       });
-      if (result.error) {
-        setFormError(readableAuthError(result.error));
-        return;
-      }
-      if (result.redirected) return;
-      // The helper already stored the session; the redirect effect navigates once
-      // `useAuth` catches up.
-      navigate({ href: redirectTarget ?? "/", replace: true });
+      if (error) throw error;
+      // A successful call performs a full-page redirect to Google.
     } catch (error) {
       setFormError(
         `${readableAuthError(error)} You can still sign in with your email and password.`,
@@ -528,6 +529,22 @@ function AuthPage() {
       <SiteNav />
       <main className="mx-auto w-full max-w-md px-5 py-12 sm:py-16">
         <div className="rounded-2xl border border-neutral-800 bg-surface/50 p-6 shadow-xl sm:p-8">
+          {backendStatus === "offline" ? (
+            <div
+              role="status"
+              className="mb-6 rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-left text-sm text-amber-200"
+            >
+              <p className="font-medium">Database not connected</p>
+              <p className="mt-1 text-xs leading-relaxed">
+                The site is deployed, but its Supabase project is not configured yet, so accounts
+                and comments are unavailable. Create a Supabase project, apply{" "}
+                <code className="rounded bg-black/30 px-1">supabase/setup-all.sql</code> and set{" "}
+                <code className="rounded bg-black/30 px-1">VITE_SUPABASE_URL</code> +{" "}
+                <code className="rounded bg-black/30 px-1">VITE_SUPABASE_PUBLISHABLE_KEY</code> (see
+                DEPLOY.md §A.0), then rebuild.
+              </p>
+            </div>
+          ) : null}
           {confirmationEmail ? (
             <div className="text-center">
               <MailCheck className="mx-auto h-10 w-10 text-accent" aria-hidden="true" />

@@ -67,7 +67,8 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
           This page did not load
         </h1>
         <p className="mt-3 text-sm text-muted-foreground">
-          An unexpected error occurred. Try again, or head back to the library.
+          An unexpected error occurred. If a network request failed, the site may be temporarily
+          unable to reach its database. Try again, or head back to the library.
         </p>
         {import.meta.env.DEV && error.message ? (
           <p className="mt-4 break-words rounded-md border border-neutral-800 bg-surface p-3 text-left font-mono text-xs text-muted-foreground">

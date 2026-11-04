@@ -66,12 +66,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let active = true;
 
     // Initial session (also resolves the very first render).
-    supabase.auth.getSession().then(({ data }) => {
-      if (!active) return;
-      setSession(data.session);
-      setLoading(false);
-      void loadRoles(data.session?.user?.id ?? null);
-    });
+    // A failed lookup (backend down / not configured) must never leave the UI
+    // stuck in a loading state or raise an unhandled rejection.
+    supabase.auth
+      .getSession()
+      .then(({ data }) => {
+        if (!active) return;
+        setSession(data.session);
+        setLoading(false);
+        void loadRoles(data.session?.user?.id ?? null);
+      })
+      .catch((error: unknown) => {
+        if (!active) return;
+        console.warn("[auth] could not read the session", error);
+        setSession(null);
+        setRoles([]);
+        setRolesLoading(false);
+        setLoading(false);
+      });
 
     const {
       data: { subscription },

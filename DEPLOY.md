@@ -29,12 +29,21 @@ toutes les lectures de données et l'authentification échouent (`ENOTFOUND`).
 
 1. Créer un projet sur <https://supabase.com/dashboard> (plan gratuit suffisant).
 2. Relever **Project URL** et la clé **anon/publishable** (Settings → API).
-3. Appliquer les migrations du dépôt, **dans l'ordre** :
-   `supabase link --project-ref <ref>` puis `supabase db push`
-   (ou coller chaque fichier de `supabase/migrations/*.sql` dans l'éditeur SQL).
+3. Appliquer le schéma : ouvrir **SQL Editor → New query**, coller tout le contenu de
+   [`supabase/setup-all.sql`](supabase/setup-all.sql) et cliquer **Run**
+   (« Success. No rows returned »). Alternative : `supabase link --project-ref <ref>` puis
+   `supabase db push` (applique les mêmes migrations, une par une).
 4. Mettre à jour `SUPABASE_URL` / `SUPABASE_PUBLISHABLE_KEY` (et les variantes `VITE_*`)
    dans `.env.production`, puis rebuilder.
 5. Créer le premier compte via `/auth` : il reçoit automatiquement les rôles `admin` + `author`.
+6. **Authentification — URL Configuration** : Site URL = `https://assia123y.github.io/amo-scans-fr`,
+   Redirect URLs = `…/auth` (production) et `http://localhost:8080/auth` (local).
+7. **(Optionnel) Connexion Google** : Authentication → Providers → Google → activer, renseigner
+   le Client ID / Secret créés dans Google Cloud Console, et ajouter
+   `https://<project-ref>.supabase.co/auth/v1/callback` aux URI de redirection autorisés côté Google.
+   Sans cette étape, le bouton « Continue with Google » affiche un message explicite invitant à
+   utiliser e-mail + mot de passe. Le broker OAuth de Lovable (`/~oauth/initiate`) n'existe pas sur
+   un hébergement statique : c'est pourquoi l'application utilise désormais l'OAuth Supabase natif.
 
 ---
 
