@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useEffect } from "react";
 import {
   Outlet,
   Link,
@@ -54,38 +55,63 @@ function NotFoundComponent() {
   );
 }
 
+/**
+ * Errors raised when a lazily-loaded route chunk cannot be fetched.
+ * Happens when a tab kept an old build open and a new deployment replaced the
+ * hashed asset files on GitHub Pages: clicking a route the tab had not loaded yet
+ * fails with "Failed to fetch dynamically imported module". A single reload fixes
+ * it, so we do it automatically (throttled to avoid any reload loop).
+ */
+const STALE_ASSET_PATTERN =
+  /dynamically imported module|Importing a module script failed|ChunkLoadError|error loading dynamically imported module|Failed to fetch/i;
+const STALE_RELOAD_KEY = "amo:stale-asset-reload";
+
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
+  const message = error?.message ?? "";
+  const isStaleAsset = STALE_ASSET_PATTERN.test(message);
+
+  useEffect(() => {
+    if (!isStaleAsset) return;
+    try {
+      const last = Number(window.sessionStorage.getItem(STALE_RELOAD_KEY) ?? "0");
+      if (Number.isFinite(last) && Date.now() - last < 15_000) return;
+      window.sessionStorage.setItem(STALE_RELOAD_KEY, String(Date.now()));
+    } catch {
+      // sessionStorage can be unavailable (private mode); reloading is still safe.
+    }
+    window.location.reload();
+  }, [isStaleAsset]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-base px-4">
       <div className="max-w-md text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
-          Something broke
+          {isStaleAsset ? "New version" : "Something broke"}
         </p>
         <h1 className="mt-4 text-2xl font-semibold tracking-tight text-foreground">
-          This page did not load
+          {isStaleAsset ? "Reloading the latest version…" : "This page did not load"}
         </h1>
         <p className="mt-3 text-sm text-muted-foreground">
-          An unexpected error occurred. If a network request failed, the site may be temporarily
-          unable to reach its database. Try again, or head back to the library.
+          {isStaleAsset
+            ? "The site was updated while this tab was open, so this page still points to files from the previous version. Reloading fixes it — it happens automatically in a second."
+            : "An unexpected error occurred. If a network request failed, the site may be temporarily unable to reach its database. Try again, or head back to the library."}
         </p>
-        {import.meta.env.DEV && error.message ? (
-          <p className="mt-4 break-words rounded-md border border-neutral-800 bg-surface p-3 text-left font-mono text-xs text-muted-foreground">
-            {error.message}
-          </p>
-        ) : null}
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <button
             type="button"
             onClick={() => {
+              if (isStaleAsset) {
+                window.location.reload();
+                return;
+              }
               void router.invalidate();
               reset();
             }}
             className="inline-flex h-10 items-center justify-center rounded-md bg-foreground px-5 text-sm font-medium text-background transition hover:opacity-90"
           >
-            Try again
+            {isStaleAsset ? "Reload now" : "Try again"}
           </button>
           <Link
             to="/"
@@ -94,6 +120,16 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
             Back to library
           </Link>
         </div>
+        {message ? (
+          <details className="mt-8 text-left">
+            <summary className="cursor-pointer text-xs uppercase tracking-widest text-muted-foreground">
+              Technical details
+            </summary>
+            <p className="mt-2 break-words rounded-md border border-neutral-800 bg-surface p-3 font-mono text-xs text-muted-foreground">
+              {message}
+            </p>
+          </details>
+        ) : null}
       </div>
     </div>
   );
