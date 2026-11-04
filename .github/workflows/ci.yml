@@ -1,8 +1,8 @@
 name: CI
 
-# VÃ©rifie chaque poussÃ©e / pull request : types, puis build statique GitHub Pages.
-# Aucun secret n'est nÃ©cessaire : seules des valeurs publiques (URL Supabase +
-# clÃ© anon/publishable, dÃ©jÃ  embarquÃ©e dans le bundle client) sont utilisÃ©es.
+# VÃƒÂ©rifie chaque poussÃƒÂ©e / pull request : types, puis build statique GitHub Pages.
+# Aucun secret n'est nÃƒÂ©cessaire : seules des valeurs publiques (URL Supabase +
+# clÃƒÂ© anon/publishable, dÃƒÂ©jÃƒÂ  embarquÃƒÂ©e dans le bundle client) sont utilisÃƒÂ©es.
 
 on:
   push:
@@ -25,13 +25,13 @@ jobs:
     timeout-minutes: 15
 
     env:
-      # Build de contrÃ´le servi Ã  la racine : la CI ne dÃ©ploie rien.
+      # Build de contrÃƒÂ´le servi ÃƒÂ  la racine : la CI ne dÃƒÂ©ploie rien.
       VITE_BASE_PATH: "/"
       VITE_SITE_URL: "https://assia123y.github.io/amo-scans-fr"
-      # Valeurs publiques (identiques Ã  .env.production), dupliquÃ©es ici pour que
-      # la CI reste verte mÃªme si .env.production venait Ã  manquer.
-      VITE_SUPABASE_URL: "https://yvjmuaofgxjibflbzybz.supabase.co"
-      VITE_SUPABASE_PUBLISHABLE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2am11YW9mZ3hqaWJmbGJ6eWJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NDgxMTAsImV4cCI6MjA5NDUyNDExMH0.mbPWl7ydKj_BM3UmoWLyYFP3rRxcNeH1C49_GjmvoN0"
+      # Valeurs publiques (identiques ÃƒÂ  .env.production), dupliquÃƒÂ©es ici pour que
+      # la CI reste verte mÃƒÂªme si .env.production venait ÃƒÂ  manquer.
+      VITE_SUPABASE_URL: "https://zfypjnylpbtijjhlcyhr.supabase.co"
+      VITE_SUPABASE_PUBLISHABLE_KEY: "sb_publishable_dUwNG2AW7Hl9Vs2l8G3vtw_ql0Q8MZi"
 
     steps:
       - name: Checkout
