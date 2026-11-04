@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowUp, ChevronLeft, ChevronRight } from "lucide-react";
 
 import { SiteNav } from "@/components/site-nav";
+import { ChapterReactions } from "@/components/chapter-reactions";
 import { CommentsSection } from "@/components/comments-section";
 import { EmptyState, ErrorState } from "@/components/query-states";
 import { ReaderToolbar, type ReaderWidthMode } from "@/components/reader-toolbar";
@@ -383,6 +384,8 @@ function Reader() {
           onBackToTop={scrollToTop}
         />
       </article>
+
+      {chapter?.id ? <ChapterReactions chapterId={chapter.id} /> : null}
 
       <CommentsSection slug={slug} episode={chapter?.number ?? episode} />
 

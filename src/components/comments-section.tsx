@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import { Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { User } from "@supabase/supabase-js";
@@ -7,12 +7,20 @@ import { toast } from "sonner";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { CommentVotes } from "@/components/comment-votes";
 import { Textarea } from "@/components/ui/textarea";
 import { ErrorState, EmptyState } from "@/components/query-states";
 import { formatCalendarDate, formatRelativeDate } from "@/components/relative-date";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { commentsQueryOptions, type CommentWithProfile, type ProfileSummary } from "@/lib/queries";
+import {
+  commentVotesQueryOptions,
+  setCommentVote,
+  tallyCommentVotes,
+  type CommentVoteRow,
+  type CommentVoteValue,
+} from "@/lib/reactions";
 import { cn } from "@/lib/utils";
 
 const MAX_LENGTH = 2000;
@@ -63,6 +71,46 @@ export function CommentsSection({ slug, episode }: CommentsSectionProps) {
   const comments = commentsQuery.data ?? [];
   const trimmed = content.trim();
   const canPost = Boolean(user) && trimmed.length > 0 && !commentsQuery.isLoading;
+
+  /* -------- like / dislike on comments -------- */
+  const commentIds = useMemo(
+    () => comments.filter((comment) => !comment.id.startsWith("optimistic-")).map((c) => c.id),
+    [comments],
+  );
+  const votesOptions = commentVotesQueryOptions(commentIds);
+  const votesQuery = useQuery(votesOptions);
+  const voteTallies = useMemo(
+    () => tallyCommentVotes(votesQuery.data ?? [], user?.id),
+    [votesQuery.data, user?.id],
+  );
+  // If the votes table is missing (migration not applied), hide the controls.
+  const votesAvailable = !votesQuery.isError;
+
+  const voteMutation = useMutation({
+    mutationFn: async (input: { commentId: string; value: CommentVoteValue | null }) => {
+      if (!user) throw new Error("Sign in to vote on comments.");
+      await setCommentVote(input.commentId, user.id, input.value);
+    },
+    onMutate: async ({ commentId, value }) => {
+      await queryClient.cancelQueries({ queryKey: votesOptions.queryKey });
+      const previous = queryClient.getQueryData<CommentVoteRow[]>(votesOptions.queryKey) ?? [];
+      const next = previous.filter(
+        (vote) => !(vote.comment_id === commentId && vote.user_id === user?.id),
+      );
+      if (value && user) {
+        next.push({ comment_id: commentId, user_id: user.id, value });
+      }
+      queryClient.setQueryData(votesOptions.queryKey, next);
+      return { previous };
+    },
+    onError: (error, _input, context) => {
+      if (context) queryClient.setQueryData(votesOptions.queryKey, context.previous);
+      toast.error(error instanceof Error ? error.message : "Could not save your vote.");
+    },
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey: votesOptions.queryKey });
+    },
+  });
 
   const postMutation = useMutation({
     mutationFn: async (value: string) => {
@@ -275,6 +323,14 @@ export function CommentsSection({ slug, episode }: CommentsSectionProps) {
                   <p className="mt-1 whitespace-pre-wrap break-words text-sm leading-relaxed text-foreground/90">
                     {comment.content}
                   </p>
+
+                  {!isOptimistic && votesAvailable ? (
+                    <CommentVotes
+                      tally={voteTallies.get(comment.id) ?? { likes: 0, dislikes: 0, mine: 0 }}
+                      disabled={!user || isOwn || voteMutation.isPending}
+                      onVote={(value) => voteMutation.mutate({ commentId: comment.id, value })}
+                    />
+                  ) : null}
 
                   {isOwn && !isOptimistic ? (
                     <div className="mt-1.5 flex items-center gap-3">

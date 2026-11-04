@@ -8,6 +8,38 @@ export type Database = {
   };
   public: {
     Tables: {
+      chapter_reactions: {
+        Row: {
+          chapter_id: string;
+          created_at: string;
+          id: string;
+          reaction: Database["public"]["Enums"]["reaction_kind"];
+          user_id: string;
+        };
+        Insert: {
+          chapter_id: string;
+          created_at?: string;
+          id?: string;
+          reaction: Database["public"]["Enums"]["reaction_kind"];
+          user_id: string;
+        };
+        Update: {
+          chapter_id?: string;
+          created_at?: string;
+          id?: string;
+          reaction?: Database["public"]["Enums"]["reaction_kind"];
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "chapter_reactions_chapter_id_fkey";
+            columns: ["chapter_id"];
+            isOneToOne: false;
+            referencedRelation: "chapters";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       chapters: {
         Row: {
           created_at: string;
@@ -69,6 +101,38 @@ export type Database = {
           user_id?: string;
         };
         Relationships: [];
+      };
+      comment_votes: {
+        Row: {
+          comment_id: string;
+          created_at: string;
+          id: string;
+          user_id: string;
+          value: number;
+        };
+        Insert: {
+          comment_id: string;
+          created_at?: string;
+          id?: string;
+          user_id: string;
+          value: number;
+        };
+        Update: {
+          comment_id?: string;
+          created_at?: string;
+          id?: string;
+          user_id?: string;
+          value?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "comment_votes_comment_id_fkey";
+            columns: ["comment_id"];
+            isOneToOne: false;
+            referencedRelation: "comments";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       panels: {
         Row: {
@@ -219,6 +283,7 @@ export type Database = {
     };
     Enums: {
       app_role: "admin" | "author" | "reader";
+      reaction_kind: "like" | "love" | "haha" | "wow" | "sad" | "fire";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -345,6 +410,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "author", "reader"],
+      reaction_kind: ["like", "love", "haha", "wow", "sad", "fire"],
     },
   },
 } as const;
